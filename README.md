@@ -1,4 +1,4 @@
-# Backelite Formation Symfony
+# Backelite Formation PHP & Symfony
 
 
 ## Prerequisites
