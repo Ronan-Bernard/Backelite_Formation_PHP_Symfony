@@ -1,0 +1,74 @@
+version: '2'
+
+services:
+    db:
+        image: mysql
+        volumes:
+            - "./tmp/.data/db:/var/lib/mysql"
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        ports:
+            - 8005:80
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        links:
+            - db
+    php:
+        build: php7-fpm
+        environment:
+            SYMFONY__DB__HOST: 'db'
+            SYMFONY__DB__PORT: '3306'
+            SYMFONY__DB__DATABASE: ${MYSQL_DATABASE}
+            SYMFONY__DB__USER: ${MYSQL_USER}
+            SYMFONY__DB__PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            SYMFONY__SMTP__HOST: 'mailcatcher'
+            SYMFONY__SMTP__PORT: '1025'
+            SYMFONY__SMTP__USER: ''
+            SYMFONY__SMTP__PASSWORD: ''
+        ports:
+            - 9000:9000
+        links:
+            - db:mysqldb
+            - mailcatcher
+        volumes:
+            - /var/www/opcache-gui
+            - ${SYMFONY_APP_PATH}:/var/www/symfony
+            - ${PHP_APP_PATH}:/var/www/php
+            - ./tmp/logs/symfony:/var/www/symfony/var/logs
+        extra_hosts:
+            - "xdebug_remote_host:${IP_HOST}"
+    nginx:
+        build: nginx
+        ports:
+            - 8000:80
+            - 8001:81
+            - 8002:82
+        links:
+            - php
+        volumes_from:
+            - php
+        volumes:
+            - ./tmp/logs/nginx/:/var/log/nginx
+    mailcatcher:
+        image: schickling/mailcatcher
+        ports:
+            - 8003:1080
+
+    elk:
+        image: willdurand/elk
+        ports:
+            - 8004:80
+        volumes:
+            - ./elk/logstash:/etc/logstash
+            - ./elk/logstash/patterns:/opt/logstash/patterns
+        volumes_from:
+            - php
+            - nginx
