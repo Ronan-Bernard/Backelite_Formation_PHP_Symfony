@@ -1,7 +1,7 @@
 <?php
 	Function zyva($a, $b = 3, $c = null) {
 		$a += $b;
-		Return $a += c;
+		Return $a += $c;
 	}
 	echo zyva(0) . ' - ' . zyva(0,1) . ' - ' . zyva(0,1,2);
 	

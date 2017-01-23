@@ -2,10 +2,10 @@
 
 	$a = 5;
 
-	If ($a == 1) {
+	If ($a == true) {
 		Echo "hein ?";
 	}
 	
-	If ($a === 1) {
+	If ($a === true) {
 		Echo "ah non";
 	}
